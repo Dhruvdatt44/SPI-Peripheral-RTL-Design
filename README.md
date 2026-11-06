@@ -24,19 +24,19 @@ I built it one block at a time and tested every block before moving on. That's w
 
 ## How it fits together
 
-The design has three main blocks, wired together by `spi_top`:
+The design has three main blocks, wired together by spi_top:
 
-1. **Register file** (`spi_register_file`) – the APB side. It holds the control, status, divider, transmit and receive registers and produces the interrupt.
-2. **SPI engine** (`spi_engine_top`) – does the actual transfer. It is made of four small modules:
-   - `SPI_FSM` decides what happens when: chip select, load, enable.
-   - `spi_clkdiv` slows the system clock down to SCLK speed.
-   - `SPI_edge_gen` produces SCLK and the "sample" and "shift" pulses for the chosen mode.
-   - `shiftregisters` turns a byte into bits on MOSI and collects the bits from MISO back into a byte.
-3. **Pin interface** (`spi_pin_interface`) – connects the engine to the pads and synchronises MISO on the way in.
+1. **Register file** (spi_register_file) – the APB side. It holds the control, status, divider, transmit and receive registers and produces the interrupt.
+2. **SPI engine** (spi_engine_top) – does the actual transfer. It is made of four small modules:
+   - SPI_FSM decides what happens when: chip select, load, enable.
+   - spi_clkdiv slows the system clock down to SCLK speed.
+   - SPI_edge_gen produces SCLK and the "sample" and "shift" pulses for the chosen mode.
+   - shiftregisters turns a byte into bits on MOSI and collects the bits from MISO back into a byte.
+3. **Pin interface** (spi_pin_interface) – connects the engine to the pads and synchronises MISO on the way in.
 
-`spi_top` is the module you instantiate in your design.
+spi_top is the module you instantiate in your design.
 
-Everything runs on the single APB clock (`Pclk`). SCLK is made by a clock enable, not a separate divided clock, which keeps timing simple.
+Everything runs on the single APB clock (Pclk). SCLK is made by a clock enable, not a separate divided clock, which keeps timing simple.
 
 ---
 
@@ -44,15 +44,15 @@ Everything runs on the single APB clock (`Pclk`). SCLK is made by a clock enable
 
 | Signal | Dir | Width | Meaning |
 |---|---|---|---|
-| `Pclk` | in | 1 | APB / system clock |
-| `Preset` | in | 1 | Reset, **active high** |
-| `Psel` `Penable` `Pwrite` | in | 1 each | APB control |
-| `Paddr` | in | 8 | Register address (bits [4:2] are decoded) |
-| `Pwdata` / `Prdata` | in / out | 32 | APB data |
-| `Pready` | out | 1 | Always 1 (no wait states) |
-| `Irq` | out | 1 | Interrupt to the host |
-| `SCLK` `MOSI` `CS` | out | 1 each | SPI to the slave (`CS` is active low) |
-| `MISO` | in | 1 | SPI from the slave |
+| Pclk | in | 1 | APB / system clock |
+| Preset | in | 1 | Reset, **active high** |
+| Psel Penable Pwrite | in | 1 each | APB control |
+| Paddr | in | 8 | Register address (bits [4:2] are decoded) |
+| Pwdata / Prdata | in / out | 32 | APB data |
+| Pready | out | 1 | Always 1 (no wait states) |
+| Irq | out | 1 | Interrupt to the host |
+| SCLK MOSI CS | out | 1 each | SPI to the slave (CS is active low) |
+| MISO | in | 1 | SPI from the slave |
 
 ---
 
@@ -60,17 +60,17 @@ Everything runs on the single APB clock (`Pclk`). SCLK is made by a clock enable
 
 | Offset | Name | Access | Bits |
 |---|---|---|---|
-| `0x00` | CTRL | R/W | `[1]` CPOL, `[2]` CPHA, `[3]` IRQ_EN |
-| `0x04` | STATUS | R | `[0]` BUSY, `[1]` DONE |
-| `0x08` | CLKDIV | R/W | `[15:0]` divider |
-| `0x0C` | TXDATA | R/W | `[7:0]` byte to send. **Writing it starts a transfer** (if not busy) |
-| `0x10` | RXDATA | R | `[7:0]` last received byte. **Reading it clears DONE and the IRQ** |
+| 0x00 | CTRL | R/W | [1] CPOL, [2] CPHA, [3] IRQ_EN |
+| 0x04 | STATUS | R | [0] BUSY, [1] DONE |
+| 0x08 | CLKDIV | R/W | [15:0] divider |
+| 0x0C | TXDATA | R/W | [7:0] byte to send. **Writing it starts a transfer** (if not busy) |
+| 0x10 | RXDATA | R | [7:0] last received byte. **Reading it clears DONE and the IRQ** |
 
 **SCLK frequency** is the APB clock divided by 2 × (CLKDIV + 1). For example, a 100 MHz clock with CLKDIV = 49 gives a 1 MHz SCLK.
 
 **Typical use:** write CTRL and CLKDIV once, then write a byte to TXDATA. Wait for DONE in STATUS (or for the interrupt), then read RXDATA, which also clears DONE and the interrupt.
 
-To use the interrupt instead of polling, set bit 3 of CTRL. `Irq` stays high from the end of the transfer until RXDATA is read.
+To use the interrupt instead of polling, set bit 3 of CTRL. Irq stays high from the end of the transfer until RXDATA is read.
 
 ---
 
@@ -82,7 +82,7 @@ The FSM walks through five states:
 2. **CS_SETUP** – CS goes low and the byte is loaded. A couple of clocks pass before SCLK moves, because slaves need setup time.
 3. **SHIFT** – the clock divider runs and eight SCLK periods go out. MOSI changes on one edge, MISO is sampled on the other. Which is which depends on the mode.
 4. **CS_HOLD** – SCLK has stopped, CS stays low for a few more clocks so the slave sees the last edge before CS rises.
-5. **DONE** – CS goes high, a one-cycle `done` pulse is produced, and the register file latches it.
+5. **DONE** – CS goes high, a one-cycle done pulse is produced, and the register file latches it.
 
 **The four modes**
 
@@ -104,13 +104,13 @@ One detail that took a while to get right: with CPHA=0 the first bit has to be o
 | spi_top.v | Top level: register file + engine + pin interface |
 | spi_register_file.v | APB registers, interrupt logic |
 | spi_engine_top.v | Engine: FSM, clock divider, edge generator, shift registers |
-| spi_fsm.v | Transfer control (`SPI_FSM`) |
+| spi_fsm.v | Transfer control (SPI_FSM) |
 | spi_clkdiv.v | Programmable clock-enable divider |
-| spi_edge_gen.v | SCLK and sample/shift pulse generator (`SPI_edge_gen`) |
+| spi_edge_gen.v | SCLK and sample/shift pulse generator (SPI_edge_gen) |
 | shiftregisters.v | TX and RX shift registers |
 | spi_pin_interface.v | Pad connections and the MISO synchroniser |
 
-Testbenches live in `tb/`:
+Testbenches live in tb/:
 
 | File | What it checks |
 |---|---|
@@ -132,9 +132,9 @@ The plan for the first hardware test is a **loopback**: jumper MOSI to MISO on a
 A few bugs that cost real time, in case they save you some:
 
 - **CPHA=1 dropped the first bit.** Preloading MOSI at load time is right for CPHA=0 and wrong for CPHA=1.
-- **CS rose with no margin after the last clock edge.** The slave needs hold time, hence `CS_HOLD`.
-- **One register driven from two `always` blocks.** The simulator accepts it, the synthesiser doesn't. Give each reg exactly one driver.
+- **CS rose with no margin after the last clock edge.** The slave needs hold time, hence CS_HOLD.
+- **One register driven from two always blocks.** The simulator accepts it, the synthesiser doesn't. Give each reg exactly one driver.
 - **Testbench races.** Sample outputs a moment *after* the clock edge, not on it.
-- **Missing reset on a config register** (`irq_en_reg`) leaves it unknown at power-up.
+- **Missing reset on a config register** (irq_en_reg) leaves it unknown at power-up.
 
 ---
