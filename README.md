@@ -101,7 +101,7 @@ One detail that took a while to get right: with CPHA=0 the first bit has to be o
 
 | File | What it is |
 |---|---|
-| `spi_top.v` | Top level: register file + engine + pin interface |
+| spi_top.v | Top level: register file + engine + pin interface |
 | `spi_register_file.v` | APB registers, interrupt logic |
 | `spi_engine_top.v` | Engine: FSM, clock divider, edge generator, shift registers |
 | `spi_fsm.v` | Transfer control (`SPI_FSM`) |
