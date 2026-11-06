@@ -1,4 +1,4 @@
-# SPI Master Peripheral (Verilog, APB)
+# SPI-Peripheral-RTL-Design (Verilog)
 
 A complete SPI **master** peripheral written from scratch in Verilog, with an APB interface so any APB-based processor or bus can drive it.
 
