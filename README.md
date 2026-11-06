@@ -102,39 +102,24 @@ One detail that took a while to get right: with CPHA=0 the first bit has to be o
 | File | What it is |
 |---|---|
 | spi_top.v | Top level: register file + engine + pin interface |
-| `spi_register_file.v` | APB registers, interrupt logic |
-| `spi_engine_top.v` | Engine: FSM, clock divider, edge generator, shift registers |
-| `spi_fsm.v` | Transfer control (`SPI_FSM`) |
-| `spi_clkdiv.v` | Programmable clock-enable divider |
-| `spi_edge_gen.v` | SCLK and sample/shift pulse generator (`SPI_edge_gen`) |
-| `shiftregisters.v` | TX and RX shift registers |
-| `spi_pin_interface.v` | Pad connections and the MISO synchroniser |
+| spi_register_file.v | APB registers, interrupt logic |
+| spi_engine_top.v | Engine: FSM, clock divider, edge generator, shift registers |
+| spi_fsm.v | Transfer control (`SPI_FSM`) |
+| spi_clkdiv.v | Programmable clock-enable divider |
+| spi_edge_gen.v | SCLK and sample/shift pulse generator (`SPI_edge_gen`) |
+| shiftregisters.v | TX and RX shift registers |
+| spi_pin_interface.v | Pad connections and the MISO synchroniser |
 
 Testbenches live in `tb/`:
 
 | File | What it checks |
 |---|---|
-| `tb_spi_top_all_modes.v` | Whole peripheral through APB, loopback, 4 modes × 3 words |
-| `tb_spi_full.v` | Whole peripheral with a mode-aware slave model that sends its *own* byte, so MOSI and MISO are checked separately; also checks STATUS, IRQ and the busy-write rule |
-| `tb_spi_engine_all_modes.v` | Engine only, loopback, 4 modes |
-| `tb_spi_register_file_v2.v` | Register file: read/write, start pulse, IRQ latch |
-| `tb_spi_pin_interface.v` | MISO synchroniser |
-| `tb_spi_clkdiv.v`, `tb_shiftregisters.v`, `tb_edge_gen.v`, `tb_spi_fsm_state.v` | The small building blocks |
+| tb_spi_top_all_modes.v | Whole peripheral through APB, loopback, 4 modes × 3 words |
+| tb_spi_engine_all_modes.v | Engine only, loopback, 4 modes |
+| tb_spi_clkdiv.v, tb_shiftregisters.v, tb_edge_gen.v, tb_spi_fsm_state.v | The small building blocks |
 
 ---
 
-## Running the simulation
-
-**Vivado**
-
-1. Add the `.v` files as design sources and the `tb_*.v` files as simulation sources.
-2. Right-click the testbench you want and choose **Set as Top**.
-3. Choose **Run Simulation → Run Behavioral Simulation**, then **Run All**.
-4. The Tcl console prints a line per word and ends with `ALL ... PASSED`.
-
-Any other Verilog simulator that supports SystemVerilog-2012 syntax, such as Icarus Verilog, works too: compile one testbench together with the design files and run it.
-
----
 
 ## Trying it on an FPGA
 
@@ -154,18 +139,7 @@ A few bugs that cost real time, in case they save you some:
 
 ---
 
-## Roadmap
 
-- [x] Clock divider, shift registers, edge generator, FSM
-- [x] Engine integration, all four modes
-- [x] APB register file with interrupt
-- [x] Pin interface with MISO synchroniser
-- [x] Full-peripheral testbenches
-- [ ] Run on real hardware (Arty S7-50)
-- [ ] TX/RX FIFOs
-- [ ] Test it from software on a processor
-
----
 
 ## License
 
