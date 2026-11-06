@@ -138,9 +138,3 @@ A few bugs that cost real time, in case they save you some:
 - **Missing reset on a config register** (`irq_en_reg`) leaves it unknown at power-up.
 
 ---
-
-
-
-## License
-
-Choose a license and put its name here (MIT is a common default for hobby projects).
